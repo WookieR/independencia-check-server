@@ -7,38 +7,15 @@ const { verificaToken, verificaAdminRol } = require('../middlewares/autenticacio
 
 const app = express();
 
-
-
 //================ GET ================
 
-app.get('/usuario', [verificaToken, verificaAdminRol], (req, res) => {
+app.get('/usuario', [verificaToken, verificaAdminRol], async (req, res) => {
+    usuarios = await Usuario.find({ estado: true }).exec();
 
-    let desde = req.query.desde || 0;
-    desde = Number(desde);
-
-    let limite = req.query.limite || 5;
-    limite = Number(limite);
-
-    Usuario.find({ estado: true }, 'nombre apellido dni email rol')
-        .limit(limite).skip(desde)
-        .exec((err, usuarios) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    message: 'Ocurrio un error',
-                    err
-                });
-            }
-
-            Usuario.countDocuments({ estado: true }, (err, conteo) => {
-                res.json({
-                    ok: true,
-                    usuarios,
-                    cuantos: conteo
-                });
-            });
-
-        });
+    res.json({
+        ok: true,
+        usuarios,
+    });
 });
 
 //================ POST ===============
